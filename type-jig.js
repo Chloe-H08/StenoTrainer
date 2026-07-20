@@ -800,6 +800,19 @@ TypeJig.removeLastInputUnit = function(jig, timeStamp) {
 	jig.setInputValue(value, timeStamp)
 }
 
+TypeJig.rewindToLastCorrectWord = function(jig, timeStamp) {
+	if(!(jig.lastMismatch >= 0)) return false
+	const parsed = tokenize(jig.input.value, {wsOnly: !!jig.actualWords})
+	if(jig.lastMismatch >= parsed.tokens.length) return false
+	let value = ''
+	for(let i=0; i<jig.lastMismatch; ++i) {
+		value += parsed.tokens[i].spaceBefore + parsed.tokens[i].text
+	}
+	value += parsed.tokens[jig.lastMismatch].spaceBefore
+	jig.setInputValue(value, timeStamp)
+	return true
+}
+
 TypeJig.TextInput.prototype.handleKeyDown = function(ev) {
 	if(ev.code !== 'Backspace' || ev.metaKey || ev.ctrlKey || ev.altKey) return
 	const active = document.activeElement
@@ -809,7 +822,9 @@ TypeJig.TextInput.prototype.handleKeyDown = function(ev) {
 
 	ev.preventDefault()
 	if(active !== this.jig.input) this.jig.focusInput()
-	TypeJig.removeLastInputUnit(this.jig, ev.timeStamp)
+	if(!TypeJig.rewindToLastCorrectWord(this.jig, ev.timeStamp)) {
+		TypeJig.removeLastInputUnit(this.jig, ev.timeStamp)
+	}
 }
 
 TypeJig.TextInput.prototype.reset = function() {
@@ -959,7 +974,9 @@ TypeJig.KeyboardInput.prototype.commitWordBoundary = function(timeStamp) {
 }
 
 TypeJig.KeyboardInput.prototype.backspace = function(timeStamp) {
-	TypeJig.removeLastInputUnit(this.jig, timeStamp)
+	if(!TypeJig.rewindToLastCorrectWord(this.jig, timeStamp)) {
+		TypeJig.removeLastInputUnit(this.jig, timeStamp)
+	}
 }
 
 TypeJig.KeyboardInput.prototype.commitChord = function(timeStamp) {
