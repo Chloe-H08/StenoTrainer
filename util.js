@@ -82,7 +82,7 @@ function setExercise(name, exercise, hints, options, jig) {
 		jig = new TypeJig(exercise, 'exercise', 'results', 'input', 'clock', hints, options);
 
 		var back = document.getElementById('back');
-		back.href = document.location.href.replace(/\?.*$/, '').replace(/\/[^\/]*$/,'') + '/' + (options.menu || 'form') + '.html';
+		back.href = document.location.href.replace(/\?.*$/, '').replace(/\/[^\/]*$/,'') + '/index.html';
 		var again = document.getElementById('again');
 		again.href = document.location.href;
 		again.addEventListener('click', function(evt) {

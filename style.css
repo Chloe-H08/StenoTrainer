@@ -422,12 +422,37 @@ textarea {
 	transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
 }
 
+select[multiple] {
+	width: 100%;
+	min-height: 16rem;
+	border-radius: 1.2rem;
+	padding: 0.5rem;
+	background: rgba(255, 255, 255, 0.78);
+}
+
 [data-theme="dark"] input[type="text"],
 [data-theme="dark"] input[type="number"],
 [data-theme="dark"] input[type="url"],
 [data-theme="dark"] select,
 [data-theme="dark"] textarea {
 	background: rgba(17, 24, 29, 0.78);
+}
+
+[data-theme="dark"] select[multiple] {
+	background: rgba(17, 24, 29, 0.86);
+}
+
+select[multiple] option {
+	padding: 0.7rem 0.85rem;
+	margin: 0.16rem 0;
+	border-radius: 0.8rem;
+	white-space: normal;
+	line-height: 1.25;
+}
+
+select[multiple] option:checked {
+	background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+	color: #fffdf7;
 }
 
 input:focus,
