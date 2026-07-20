@@ -40,6 +40,16 @@
 			<label><input id="show_stats" type="checkbox" name="show_stats" value="1" checked>Show Stats at End of Exercise</label>
 		</div><br>
 
+		<div name="input_mode">
+			<label>Input Mode:
+				<select id="input_mode" name="input_mode">
+					<option value="text">Plover / Text Input</option>
+					<option value="keyboard">Regular Keyboard</option>
+				</select>
+			</label>
+			<small>Regular Keyboard captures steno chords directly. Use space to finish each word.</small>
+		</div><br>
+
 		<div name="speed">
 			<label><input id="wpm" type="number" name="wpm" value="" step="5"> Speed (words per minute)
 				(or <input type="checkbox" id="cpm" value="1"> x5 chars per minute) </label>
@@ -298,6 +308,8 @@ function getSettings(evt) {
 
 	var show_timer = document.getElementById('show_timer')
 	hiddenField(this, 'show_timer', show_timer.checked ? show_timer.value : 'no')
+	var input_mode = document.getElementById('input_mode')
+	hiddenField(this, 'input_mode', input_mode.value)
 	var wpm = document.getElementById('wpm')
 	var cpm = document.getElementById('cpm')
 	if(cpm.checked) hiddenField(this, 'cpm', 5*wpm.value)

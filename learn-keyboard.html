@@ -24,6 +24,12 @@
 					<li><select name="drill"></select></li>
 					<li><label><input name="count" type="number" value="100"> Length (number of chords).</label></li>
 					<li><label><input name="hints" type="checkbox" value="yes" checked> Show hints?</label></li>
+					<li><label>Input mode:
+						<select id="input_mode" name="input_mode">
+							<option value="text">Plover / Text Input</option>
+							<option value="keyboard">Regular Keyboard</option>
+						</select>
+					</label></li>
 					<li><label><input name="wpm" type="number" value="" step="5"> Speed (strokes per minute).</label></li>
 					<li><input type="submit" value="Go"></li>
 				</ul>
@@ -136,6 +142,7 @@ function saveFormState(form) {
         drill: form.drill.value,
 		count: form.count.value,
         hints: form.hints.checked,
+		input_mode: form.input_mode.value,
     });
 }
 
@@ -147,6 +154,7 @@ function loadFormState(form) {
 	if(loaded.count) {
 		form.count.value = loaded.count
 	}
+	if(loaded.input_mode) form.input_mode.value = loaded.input_mode
     form.hints.checked = loaded.hints;
 }
 

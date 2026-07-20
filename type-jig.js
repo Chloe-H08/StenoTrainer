@@ -23,6 +23,7 @@ function TypeJig(exercise, display, results, input, clock, hint, options) {
 	this.display = documentElement(display);
 	this.input = documentElement(input);
 	this.resultsDisplay = documentElement(results);
+	this.options = options
 
 	const liveWPM = documentElement('live-wpm-display');
 	const clockElt = documentElement(clock);
@@ -44,6 +45,9 @@ function TypeJig(exercise, display, results, input, clock, hint, options) {
 	this.enterCount = 0;
 
 	this.lookahead = 1000;
+	this.translationFor = TypeJig.shortestTranslations(TypeJig.Translations.Plover || {});
+	this.inputMode = TypeJig.resolveInputMode(options);
+	this.expectedTransform = null;
 
 	if(options) {
 		if(options.wpm !== '' && Math.floor(+options.wpm) == options.wpm) {
@@ -60,17 +64,15 @@ function TypeJig(exercise, display, results, input, clock, hint, options) {
 			units: 'words per minute', u: 'WPM'
 		}
 	}
+	if(this.inputMode === 'keyboard' && typeof options.match !== 'function' && !this.actualWords) {
+		this.match = TypeJig.matchExact
+		this.expectedTransform = this.expectedStenoFor.bind(this)
+	}
 
 	var self = this;  // close over `this` for event handlers.
 
 	this.changeHandler = this.answerChanged.bind(this);
 	bindEvent(document.body, 'keydown', this.keyDown.bind(this));
-	bindEvent(this.input, 'input', function(ev) {
-		if(!self.pendingChange) {
-			self.chordTime = Math.round(ev.timeStamp);
-			self.pendingChange = setTimeout(self.changeHandler, 25);
-		}
-	});
 
 	var focusHandler = this.updateCursor.bind(this);
 	bindEvent(this.input, 'focus', focusHandler);
@@ -79,6 +81,7 @@ function TypeJig(exercise, display, results, input, clock, hint, options) {
 		self.input.focus(); evt.preventDefault();
 	};
 	bindEvent(this.display, 'click', focusInput);
+	this.inputController = TypeJig.createInputController(this, options);
 
 	this.reset();
 }
@@ -112,14 +115,39 @@ TypeJig.prototype.reset = function() {
 
 	this.pendingChange = true;
 	this.input.value = '';
-	this.input.blur();
-	this.input.focus();
+	if(this.inputController && this.inputController.reset) this.inputController.reset();
+	else this.focusInput();
 	delete this.pendingChange;
 
 	this.running = false;
 	this.clock.reset();
 
 	window.scroll(0, scrollOffset(this.display));
+}
+
+TypeJig.prototype.focusInput = function() {
+	this.input.blur();
+	this.input.focus();
+}
+
+TypeJig.prototype.queueChange = function(timeStamp) {
+	if(!this.pendingChange) {
+		this.chordTime = Math.round(timeStamp == null ? performance.now() : timeStamp);
+		this.pendingChange = setTimeout(this.changeHandler, 25);
+	}
+}
+
+TypeJig.prototype.setInputValue = function(value, timeStamp) {
+	this.input.value = value;
+	this.queueChange(timeStamp);
+}
+
+TypeJig.prototype.expectedStenoFor = function(word) {
+	const exact = this.translationFor[word]
+	if(exact) return exact
+	const lower = this.translationFor[word.toLowerCase()]
+	if(lower) return lower
+	return word
 }
 
 TypeJig.wordsAndSpaces = function(string) {
@@ -218,6 +246,20 @@ TypeJig.matchOtherSpellings = (A,B) => {
 	const spellingMatches = (spelling[a]||a) === (spelling[b]||b)
 	const caseMatches = A.substr(0,2) === B.substr(0,2)
 	return spellingMatches && caseMatches
+}
+
+TypeJig.resolveInputMode = function(options) {
+	if(options && options.input_mode) return options.input_mode
+	if(typeof storageAvailable === 'function' && storageAvailable('localStorage') &&
+		localStorage.input_mode) {
+		return localStorage.input_mode
+	}
+	return 'text'
+}
+
+TypeJig.createInputController = function(jig, options) {
+	if(jig.inputMode === 'keyboard') return new TypeJig.KeyboardInput(jig, options)
+	return new TypeJig.TextInput(jig, options)
 }
 
 // Arrays of strings (or of arrays of strings).
@@ -430,8 +472,10 @@ TypeJig.prototype.answerChanged = function() {
 		var endOfAnswer = (a === actual.tokens.length-1)
 		const A = actual.tokens[a], E = expected.tokens[a] || {text:''}
 		var ac = A.text, ex = E.text
-		match = this.match(ac, ex)
-		partial = endOfAnswer && ac.length < ex.length && ac === ex.slice(0, ac.length)
+		const expectedComparable = this.expectedTransform ? this.expectedTransform(ex) : ex
+		match = this.match(ac, expectedComparable)
+		partial = endOfAnswer && ac.length < expectedComparable.length &&
+			ac === expectedComparable.slice(0, ac.length)
 		if(!(match || partial)) lastMismatch = a
 		if(match && a === this.lastMismatch) this.lastMismatch = -1
 
@@ -565,7 +609,7 @@ TypeJig.prototype.currentSpeed = function(seconds, prev) {
 
 	var wordsFromSpaces = this.input.value.split(/\s+/).length;
 	var wordsFromChars = this.input.value.length / 5;
-	var words = this.actualWords ? wordsFromSpaces : wordsFromChars;
+	var words = (this.actualWords || this.inputMode === 'keyboard') ? wordsFromSpaces : wordsFromChars;
 	var WPM = words / minutes;
 	if(prev) WPM = (words - prev.words) / (minutes - prev.minutes)
 	var correctedWPM = WPM - (this.errorCount / minutes);
@@ -620,7 +664,6 @@ TypeJig.prototype.endExercise = function(seconds) {
 	if(this.running) this.running = false; else return;
 
 	if(document.activeElement != document.body) document.activeElement.blur();
-	unbindEvent(this.input, this.changeHandler)
 
 	if(this.lastAnswered) {
 		let elt = this.lastAnswered
@@ -678,6 +721,169 @@ TypeJig.prototype.updateCursor = function(evt) {
 	}
 	if(hasFocus) this.addCursor(output);
 	else this.removeCursor(output);
+}
+
+TypeJig.TextInput = function(jig) {
+	this.jig = jig
+	this.onInput = this.handleInput.bind(this)
+	bindEvent(jig.input, 'input', this.onInput)
+}
+
+TypeJig.TextInput.prototype.handleInput = function(ev) {
+	this.jig.queueChange(ev.timeStamp)
+}
+
+TypeJig.TextInput.prototype.reset = function() {
+	this.jig.focusInput()
+}
+
+TypeJig.TextInput.prototype.destroy = function() {
+	unbindEvent(this.jig.input, 'input', this.onInput)
+}
+
+TypeJig.KeyboardInput = function(jig) {
+	this.jig = jig
+	this.pressedKeys = new Set()
+	this.logicalKeys = new Map()
+	this.onKeyDown = this.handleKeyDown.bind(this)
+	this.onKeyUp = this.handleKeyUp.bind(this)
+	this.onBlur = this.handleBlur.bind(this)
+	this.onVisibility = this.handleVisibilityChange.bind(this)
+	bindEvent(window, 'keydown', this.onKeyDown)
+	bindEvent(window, 'keyup', this.onKeyUp)
+	bindEvent(window, 'blur', this.onBlur)
+	bindEvent(document, 'visibilitychange', this.onVisibility)
+}
+
+TypeJig.KeyboardInput.leftOrder = ['S','T','K','P','W','H','R']
+TypeJig.KeyboardInput.vowelOrder = ['A','O','*','E','U']
+TypeJig.KeyboardInput.rightOrder = ['F','R','P','B','L','G','T','S','D','Z']
+TypeJig.KeyboardInput.keyMap = {
+	KeyQ: 'S', KeyA: 'S',
+	KeyW: 'T', KeyS: 'K', KeyE: 'P', KeyD: 'W', KeyR: 'H', KeyF: 'R',
+	KeyC: 'A', KeyV: 'O',
+	KeyT: '*', KeyG: '*', KeyY: '*', KeyH: '*',
+	KeyN: 'E', KeyM: 'U',
+	KeyU: '-F', KeyJ: '-R', KeyI: '-P', KeyK: '-B', KeyO: '-L',
+	KeyL: '-G', KeyP: '-T', Semicolon: '-S', BracketLeft: '-D', Quote: '-Z'
+}
+
+TypeJig.KeyboardInput.prototype.clearState = function() {
+	this.pressedKeys.clear()
+	this.logicalKeys.clear()
+}
+
+TypeJig.KeyboardInput.prototype.reset = function() {
+	this.clearState()
+	this.jig.focusInput()
+}
+
+TypeJig.KeyboardInput.prototype.destroy = function() {
+	unbindEvent(window, 'keydown', this.onKeyDown)
+	unbindEvent(window, 'keyup', this.onKeyUp)
+	unbindEvent(window, 'blur', this.onBlur)
+	unbindEvent(document, 'visibilitychange', this.onVisibility)
+}
+
+TypeJig.KeyboardInput.prototype.handleVisibilityChange = function() {
+	if(document.hidden) this.clearState()
+}
+
+TypeJig.KeyboardInput.prototype.handleBlur = function() {
+	this.clearState()
+}
+
+TypeJig.KeyboardInput.prototype.lookupLogicalKey = function(code) {
+	return TypeJig.KeyboardInput.keyMap[code] || null
+}
+
+TypeJig.KeyboardInput.prototype.handleKeyDown = function(ev) {
+	const logical = this.lookupLogicalKey(ev.code)
+	if(logical) {
+		ev.preventDefault()
+		if(ev.repeat || this.pressedKeys.has(ev.code)) return
+		this.pressedKeys.add(ev.code)
+		if(!this.logicalKeys.has(logical)) this.logicalKeys.set(logical, new Set())
+		this.logicalKeys.get(logical).add(ev.code)
+		return
+	}
+	if(ev.repeat) return
+	if(ev.code === 'Space') {
+		ev.preventDefault()
+		this.commitWordBoundary(ev.timeStamp)
+		return
+	}
+	if(ev.code === 'Backspace') {
+		ev.preventDefault()
+		this.backspace(ev.timeStamp)
+		return
+	}
+	if(ev.code === 'Escape') {
+		ev.preventDefault()
+		this.reset()
+	}
+}
+
+TypeJig.KeyboardInput.prototype.handleKeyUp = function(ev) {
+	const logical = this.lookupLogicalKey(ev.code)
+	if(!logical) return
+	ev.preventDefault()
+	this.pressedKeys.delete(ev.code)
+	const sources = this.logicalKeys.get(logical)
+	if(sources) {
+		sources.delete(ev.code)
+		if(sources.size === 0) this.logicalKeys.delete(logical)
+	}
+	if(this.pressedKeys.size === 0) this.commitChord(ev.timeStamp)
+}
+
+TypeJig.KeyboardInput.prototype.commitWordBoundary = function(timeStamp) {
+	if(this.jig.actualWords) return
+	const value = this.jig.input.value
+	if(value && !/\s$/.test(value)) this.jig.setInputValue(value + ' ', timeStamp)
+}
+
+TypeJig.KeyboardInput.prototype.backspace = function(timeStamp) {
+	let value = this.jig.input.value
+	if(value === '') return
+	value = value.replace(/\s+$/, '')
+	if(this.jig.actualWords) value = value.replace(/\S+$/, '')
+	else value = value.replace(/(?:^|\/)[^/\s]+$/, '')
+	this.jig.setInputValue(value, timeStamp)
+}
+
+TypeJig.KeyboardInput.prototype.commitChord = function(timeStamp) {
+	if(this.logicalKeys.size === 0) return
+	const stroke = this.serializeStroke()
+	if(stroke === '') return
+	let value = this.jig.input.value
+	if(this.jig.actualWords) {
+		if(value && !/\s$/.test(value)) value += ' '
+		value += stroke + ' '
+	} else if(value === '' || /\s$/.test(value)) {
+		value += stroke
+	} else {
+		value += '/' + stroke
+	}
+	this.logicalKeys.clear()
+	this.jig.setInputValue(value, timeStamp)
+}
+
+TypeJig.KeyboardInput.prototype.serializeStroke = function() {
+	const left = []
+	const vowels = []
+	const right = []
+	for(const key of TypeJig.KeyboardInput.leftOrder) {
+		if(this.logicalKeys.has(key)) left.push(key)
+	}
+	for(const key of TypeJig.KeyboardInput.vowelOrder) {
+		if(this.logicalKeys.has(key)) vowels.push(key)
+	}
+	for(const key of TypeJig.KeyboardInput.rightOrder) {
+		if(this.logicalKeys.has('-' + key)) right.push(key)
+	}
+	const needsHyphen = left.length === 0 && vowels.length === 0 && right.length > 0
+	return left.join('') + vowels.join('') + (needsHyphen ? '-' : '') + right.join('')
 }
 
 

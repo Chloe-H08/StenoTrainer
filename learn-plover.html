@@ -23,6 +23,12 @@
 				<ul style="list-style-type: none">
 					<li><select name="drill" multiple></select></li>
 					<li><label><input name="hints" type="checkbox" value="yes" checked> Show hints?</label></li>
+					<li><label>Input mode:
+						<select id="input_mode" name="input_mode">
+							<option value="text">Plover / Text Input</option>
+							<option value="keyboard">Regular Keyboard</option>
+						</select>
+					</label></li>
 					<li><label><input id="randomly" name="type" type="radio" value="randomly"> Randomly</label> for <input name="timeLimit" type="text" size="2", value="10" onfocus="selectRandomly()"> minutes.</li>
 					<li><label><input id="ordered" name="type" type="radio" value="once" checked> Once in order.</label></li>
 					<li><label><input id="shuffled" name="type" type="radio" value="shuffled"> Once in random order.</label></li>
@@ -109,12 +115,13 @@ function saveFormState(form) {
 			break
 		}
 	}
-    save({
-        drill: form.drill.value,
-        hints: form.hints.checked,
-        type: drillType,
-        timeLimit: form.timeLimit.value,
-    });
+	    save({
+	        drill: form.drill.value,
+	        hints: form.hints.checked,
+	        input_mode: form.input_mode.value,
+	        type: drillType,
+	        timeLimit: form.timeLimit.value,
+	    });
 }
 
 function loadFormState(form) {
@@ -123,6 +130,7 @@ function loadFormState(form) {
         form.drill.value = loaded.drill;
     }
 	if(loaded.hints != null) form.hints.checked = !!loaded.hints;
+	if(loaded.input_mode != null) form.input_mode.value = loaded.input_mode;
 	if(loaded.type != null) {
 		let radioButtons = document.getElementById('selectDrill').elements['type']
 		for(let i=0; i<radioButtons.length; ++i) {

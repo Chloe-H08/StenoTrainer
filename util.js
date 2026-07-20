@@ -190,6 +190,17 @@ function loadSetting(elementID,settingName) {
 	}
 }
 
+function loadChoiceSetting(elementID, settingName) {
+	const element = document.getElementById(elementID)
+	if(!element) return
+	if(localStorage[settingName] != null) {
+		element.value = localStorage[settingName]
+	}
+	element.addEventListener("input", function() {
+		localStorage[settingName] = element.value
+	})
+}
+
 function loadSettings() {
 	if(!storageAvailable('localStorage')) return
 
@@ -212,6 +223,7 @@ function loadSettings() {
 	loadSetting("live_wpm","live_wpm");
 	loadSetting("show_timer", "show_timer");
 	loadSetting("show_stats", "show_stats")
+	loadChoiceSetting("input_mode", "input_mode")
 
 	// CPM
 	const cpm = document.getElementById('cpm')
@@ -344,7 +356,7 @@ function tokenize(string, parsed) {
 	}
 
 	const isWhite = /^\s+$/
-	const isSteno = /^S?T?K?P?W?H?R?(A?O?\*?E?U?|-)F?R?P?B?L?G?T?S?D?Z?$/
+	const isSteno = /^(S?T?K?P?W?H?R?(A?O?\*?E?U?|-)F?R?P?B?L?G?T?S?D?Z?)(\/S?T?K?P?W?H?R?(A?O?\*?E?U?|-)F?R?P?B?L?G?T?S?D?Z?)*$/
 	const wsWords = /\S+|\s+/g
 	const pWords = /(\p{Punctuation}|(?:\P{Punctuation}|')+)/gu
 	const words = string.match(wsWords) || []
