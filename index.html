@@ -2,68 +2,63 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Steno Jig</title>
+	<title>Steno Trainer</title>
 	<link href="style.css" rel="stylesheet" type="text/css">
 	<link rel="stylesheet" type="text/css" href="font-roboto.css">
 	<script src="util.js"></script>
 </head>
 <body>
 
-<div class="wrapper">
-	<div class="page-kicker">Browser-Based Steno Practice</div>
-	<h1 class="center title">Steno Jig</h1>
+<div class="wrapper home-shell">
+	<section class="hero-card">
+		<div class="page-kicker">Steno Trainer</div>
+		<h1>Choose how you want to practice.</h1>
+		<p class="welcome-text">Train raw steno, theory patterns, keyboard geography, or longer reading drills from one cleaner home screen. The old “night mode and settings first” page is gone, so you can jump straight into the kind of practice you want.</p>
+		<div class="hero-actions">
+			<a class="hero-link primary" href="form.html">Open Drill Library</a>
+			<a class="hero-link" href="learn-keyboard.html">Regular Keyboard Practice</a>
+			<a class="hero-link" href="learn-plover.html">Learn Plover</a>
+		</div>
+	</section>
 
-	<p class="welcome-text">This is a widget for stenography lessons: you can
-	<a href="learn-keyboard.html">learn the steno keyboard</a>, do <a
-	href="form.html">our lessons</a> or the <a
-	href="learn-plover.html">Learn Plover ones</a>, or fork the <a
-	href="https://github.com/JoshuaGrams/steno-jig">GitHub repo</a>
-	and customize it to make your own.</p>
-	<p class="welcome-text">Practice briefs, raw steno, guided drills, and full-text lessons in a calmer, more focused workspace that still keeps the original project’s lightweight spirit.</p>
+	<section class="practice-grid">
+		<a class="practice-card" href="form.html">
+			<span class="practice-tag">Main Hub</span>
+			<h2>Drill Library</h2>
+			<p>Browse sentence drills, custom text, quotes, random generators, and focused word practice from the main catalog.</p>
+		</a>
+
+		<a class="practice-card" href="intro.html">
+			<span class="practice-tag">Foundations</span>
+			<h2>Intro Lessons</h2>
+			<p>Start with smaller lesson groups that isolate core key clusters and early-word patterns.</p>
+		</a>
+
+		<a class="practice-card" href="learn-keyboard.html">
+			<span class="practice-tag">Direct Chords</span>
+			<h2>Keyboard Practice</h2>
+			<p>Practice steno chords with either raw Plover input or the built-in regular-keyboard mode.</p>
+		</a>
+
+		<a class="practice-card" href="learn-plover.html">
+			<span class="practice-tag">Theory</span>
+			<h2>Learn Plover</h2>
+			<p>Work through organized Plover-style lesson sets in order, shuffled review, or random mode.</p>
+		</a>
+
+		<a class="practice-card" href="finger-drills.html">
+			<span class="practice-tag">Rhythm</span>
+			<h2>Finger Drills</h2>
+			<p>Build endurance and timing with repeated raw-steno patterns, duet drills, and custom stroke strings.</p>
+		</a>
+
+		<a class="practice-card" href="raw-steno-instructions.html">
+			<span class="practice-tag">Setup</span>
+			<h2>Raw Input Guide</h2>
+			<p>Need Plover raw output? Open the setup guide for the original workflow and toggle instructions.</p>
+		</a>
+	</section>
 </div>
-
-<script>
-	setTheme()
-	if(storageAvailable('localStorage')) {
-		let wrapper = document.querySelector('.wrapper')
-		let isDark = localStorage.theme === 'dark'
-		let checkbox = document.createElement('input')
-		checkbox.setAttribute('id', 'night-mode')
-		checkbox.setAttribute('type', 'checkbox')
-		checkbox.checked = isDark
-		checkbox.addEventListener('input', function(e) {
-			if(e.target.checked) {
-				localStorage.theme = 'dark'
-				document.body.setAttribute('data-theme', localStorage.theme)
-			} else {
-				delete localStorage.theme
-				document.body.removeAttribute('data-theme')
-			}
-		})
-		wrapper.appendChild(checkbox)
-		let label = document.createElement('label')
-		label.setAttribute('for', 'night-mode')
-		label.appendChild(document.createTextNode(' Night Mode'))
-		wrapper.appendChild(label)
-
-		const saveStats = localStorage.save_stats != null
-		const statsCtrl = N('input', {
-			type: 'checkbox',
-			click: (evt) => {
-				if(statsCtrl.checked) localStorage.setItem('save_stats', 1)
-				else localStorage.removeItem('save_stats')
-			}
-		})
-		statsCtrl.checked = saveStats
-		N(wrapper, N('br'), N('label', statsCtrl, 'Record Stats'))
-		if(localStorage.count) {
-			linkExercises(localStorage, wrapper)
-			listExercises(localStorage, wrapper)
-		}
-	} else {
-		document.body.appendChild(document.createTextNode('localStorage not available.'))
-	}
-</script>
 
 </body>
 </html>

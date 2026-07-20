@@ -100,6 +100,10 @@ body::after {
 	padding: 2rem 1.25rem 3rem;
 }
 
+body.has-app-chrome .wrapper {
+	padding-left: clamp(4.8rem, 7vw, 7rem);
+}
+
 .wrapper > h1:first-child,
 .wrapper > #form > h1:first-child {
 	font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
@@ -135,6 +139,199 @@ p {
 	font-size: 1.05rem;
 	color: var(--muted-fg);
 	text-wrap: balance;
+}
+
+.intro-copy {
+	max-width: 48rem;
+	font-size: 1.03rem;
+	color: var(--muted-fg);
+	text-wrap: balance;
+}
+
+.menu-toggle {
+	position: fixed;
+	top: 1.2rem;
+	left: 1.2rem;
+	z-index: 50;
+	width: 3rem;
+	height: 3rem;
+	border: 1px solid var(--surface-border);
+	border-radius: 999px;
+	background: rgba(255, 250, 242, 0.92);
+	box-shadow: 0 12px 26px rgba(34, 47, 62, 0.16);
+	padding: 0;
+	display: grid;
+	place-items: center;
+}
+
+.menu-toggle-line {
+	display: block;
+	width: 1.1rem;
+	height: 2px;
+	border-radius: 999px;
+	background: var(--main-fg);
+	margin: 0.12rem 0;
+}
+
+.menu-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(17, 24, 29, 0.28);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 180ms ease;
+	z-index: 39;
+}
+
+.app-sidebar {
+	position: fixed;
+	inset: 0 auto 0 0;
+	width: min(24rem, calc(100vw - 2rem));
+	padding: 5.5rem 1.25rem 1.5rem;
+	background: rgba(255, 251, 244, 0.96);
+	backdrop-filter: blur(18px);
+	border-right: 1px solid var(--surface-border);
+	box-shadow: 0 18px 60px rgba(34, 47, 62, 0.18);
+	transform: translateX(calc(-100% - 1rem));
+	transition: transform 220ms ease;
+	z-index: 40;
+	overflow-y: auto;
+}
+
+.sidebar-open .app-sidebar {
+	transform: translateX(0);
+}
+
+.sidebar-open .menu-overlay {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.app-sidebar-header {
+	margin-bottom: 1.5rem;
+}
+
+.app-sidebar-title {
+	margin: 0.2rem 0 0.6rem;
+	font-size: 2rem;
+	line-height: 0.95;
+}
+
+.app-sidebar-copy {
+	color: var(--muted-fg);
+	max-width: 18rem;
+}
+
+.app-nav {
+	display: grid;
+	gap: 0.8rem;
+}
+
+.app-nav-link {
+	display: block;
+	padding: 0.9rem 1rem;
+	background: rgba(255, 255, 255, 0.72);
+	border: 1px solid var(--surface-border);
+	border-radius: 1rem;
+	box-shadow: 0 8px 18px rgba(34, 47, 62, 0.08);
+}
+
+.app-nav-link.active {
+	background: linear-gradient(135deg, rgba(212, 107, 60, 0.16), rgba(11, 107, 114, 0.08));
+	border-color: rgba(212, 107, 60, 0.28);
+}
+
+.app-nav-label {
+	display: block;
+	font-weight: 700;
+	color: var(--main-fg);
+}
+
+.app-nav-description {
+	display: block;
+	margin-top: 0.2rem;
+	font-size: 0.9rem;
+	color: var(--muted-fg);
+}
+
+.home-shell {
+	display: grid;
+	gap: 1.3rem;
+}
+
+.hero-card {
+	background: linear-gradient(135deg, rgba(255, 249, 240, 0.98), rgba(255, 241, 227, 0.9));
+	border: 1px solid var(--surface-border);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--surface-shadow);
+	padding: clamp(1.6rem, 4vw, 2.6rem);
+}
+
+.hero-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.8rem;
+	margin-top: 1.4rem;
+}
+
+.hero-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.85rem 1.15rem;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.72);
+	border: 1px solid var(--surface-border);
+	font-weight: 700;
+}
+
+.hero-link.primary {
+	background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+	color: #fffdf7;
+	border: none;
+	box-shadow: 0 14px 26px rgba(185, 77, 39, 0.24);
+}
+
+.practice-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+	gap: 1rem;
+}
+
+.practice-card {
+	display: block;
+	background: linear-gradient(180deg, var(--surface-strong), var(--surface-2));
+	padding: 1.2rem;
+	border-radius: var(--radius-md);
+	border: 1px solid var(--surface-border);
+	box-shadow: 0 12px 32px rgba(34, 47, 62, 0.08);
+	min-height: 12rem;
+}
+
+.practice-card h2,
+.practice-card h3 {
+	margin: 0 0 0.55rem;
+	font-size: 1.5rem;
+	line-height: 1;
+	color: var(--main-fg);
+}
+
+.practice-card p {
+	color: var(--muted-fg);
+	font-size: 0.96rem;
+}
+
+.practice-tag {
+	display: inline-block;
+	margin-bottom: 0.85rem;
+	padding: 0.28rem 0.6rem;
+	border-radius: 999px;
+	background: var(--accent-soft);
+	color: var(--accent-strong);
+	font-size: 0.77rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
 }
 
 a, a:visited {
@@ -508,6 +705,12 @@ hr {
 @media (max-width: 720px) {
 	.wrapper {
 		padding: 1.15rem 0.9rem 2rem;
+	}
+
+	body.has-app-chrome .wrapper {
+		padding-left: 1rem;
+		padding-right: 1rem;
+		padding-top: 4.7rem;
 	}
 
 	#form,

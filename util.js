@@ -170,13 +170,7 @@ function storageAvailable(type) {
 }
 
 function setTheme() {
-	if(storageAvailable('localStorage')) {
-		if(localStorage.theme == null) {
-			document.body.removeAttribute('data-theme')
-		} else {
-			document.body.setAttribute('data-theme', localStorage.theme)
-		}
-	}
+	if(document.body) document.body.removeAttribute('data-theme')
 }
 function loadSetting(elementID,settingName) {
 	const element = document.getElementById(elementID)
@@ -203,13 +197,6 @@ function loadChoiceSetting(elementID, settingName) {
 
 function loadSettings() {
 	if(!storageAvailable('localStorage')) return
-
-	// Theme
-	if(localStorage.theme == null) {
-		document.body.removeAttribute('data-theme')
-	} else {
-		document.body.setAttribute('data-theme', localStorage.theme)
-	}
 
 	// Hints
 	const hints = document.getElementsByName('hints');
@@ -253,6 +240,85 @@ function loadSettings() {
 			localStorage.alternate = alt.value
 		})
 	}
+}
+
+const APP_NAV_ITEMS = [
+	{ href: 'index.html', label: 'Home', description: 'Start here' },
+	{ href: 'form.html', label: 'Drill Library', description: 'Mixed drills and custom practice' },
+	{ href: 'intro.html', label: 'Intro Lessons', description: 'Foundations and first drills' },
+	{ href: 'learn-keyboard.html', label: 'Keyboard Practice', description: 'Map keys and chords' },
+	{ href: 'learn-plover.html', label: 'Learn Plover', description: 'Theory-focused lessons' },
+	{ href: 'finger-drills.html', label: 'Finger Drills', description: 'Rhythm and repetition work' },
+	{ href: 'raw-steno-instructions.html', label: 'Raw Input Guide', description: 'Plover setup notes' },
+]
+
+function currentPageName() {
+	const path = window.location.pathname
+	const match = /[^/]+$/.exec(path)
+	return match ? match[0] : 'index.html'
+}
+
+function initAppChrome() {
+	if(!document.body || document.body.dataset.appChrome === 'ready') return
+	document.body.dataset.appChrome = 'ready'
+	document.body.classList.add('has-app-chrome')
+
+	const button = N('button', {
+		type: 'button',
+		class: 'menu-toggle',
+		'aria-expanded': 'false',
+		'aria-controls': 'app-sidebar',
+		click: () => toggleSidebar(),
+	}, N('span', {class: 'menu-toggle-line'}),
+		N('span', {class: 'menu-toggle-line'}),
+		N('span', {class: 'menu-toggle-line'}))
+
+	const overlay = N('div', {
+		class: 'menu-overlay',
+		click: () => closeSidebar(),
+	})
+
+	const current = currentPageName()
+	const navLinks = APP_NAV_ITEMS.map(item => {
+		const active = current === item.href
+		return N('a', {
+			href: item.href,
+			class: 'app-nav-link' + (active ? ' active' : ''),
+		}, N('span', {class: 'app-nav-label'}, item.label),
+			N('span', {class: 'app-nav-description'}, item.description))
+	})
+
+	const sidebar = N('aside', {
+		id: 'app-sidebar',
+		class: 'app-sidebar',
+		'aria-hidden': 'true',
+	}, N('div', {class: 'app-sidebar-header'},
+			N('div', {class: 'page-kicker'}, 'Practice Modes'),
+			N('h2', {class: 'app-sidebar-title'}, 'Steno Trainer'),
+			N('p', {class: 'app-sidebar-copy'},
+				'Move between drills, keyboard training, and setup guides from one place.')
+		),
+		N('nav', {class: 'app-nav'}, navLinks))
+
+	document.body.appendChild(button)
+	document.body.appendChild(overlay)
+	document.body.appendChild(sidebar)
+
+	function toggleSidebar() {
+		const open = document.body.classList.toggle('sidebar-open')
+		button.setAttribute('aria-expanded', open ? 'true' : 'false')
+		sidebar.setAttribute('aria-hidden', open ? 'false' : 'true')
+	}
+
+	function closeSidebar() {
+		document.body.classList.remove('sidebar-open')
+		button.setAttribute('aria-expanded', 'false')
+		sidebar.setAttribute('aria-hidden', 'true')
+	}
+
+	document.addEventListener('keydown', function(evt) {
+		if(evt.key === 'Escape') closeSidebar()
+	})
 }
 
 /**
@@ -587,3 +653,8 @@ function renderResults(stats, strokes, elt, jig) {
 
 	return chart
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+	setTheme()
+	initAppChrome()
+})
