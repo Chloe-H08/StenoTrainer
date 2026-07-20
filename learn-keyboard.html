@@ -65,6 +65,16 @@
 
 <script>
 window.onload = function() {
+	var form = document.getElementById('selectDrill');
+	var drill = form.elements.drill;
+	if(drill.options.length === 0) {
+		var order = Object.keys(TypeJig.WordSets.LearnKeyboard);
+		for(var i=0; i<order.length; ++i) {
+			var option = document.createElement('option');
+			option.appendChild(document.createTextNode(order[i]));
+			drill.appendChild(option);
+		}
+	}
 
 var leftFromPseudo = {
 	'C': 'KR',
@@ -99,14 +109,6 @@ function fromPseudo(stroke) {
 	return (left+vowel+right).replace(/-$/,'')
 }
 	if(document.location.search === '') {
-		var form = document.getElementById('selectDrill');
-		var drill = form.elements.drill;
-		var order = Object.keys(TypeJig.WordSets.LearnKeyboard);
-		for(var i=0; i<order.length; ++i) {
-			var option = document.createElement('option');
-			option.appendChild(document.createTextNode(order[i]));
-			drill.appendChild(option);
-		}
 		drill.focus();
 
 		loadFormState(form);
@@ -135,6 +137,13 @@ function fromPseudo(stroke) {
 			jig.match = function(a, b) {
 				return a == fromPseudo(b)
 			}
+			mountLessonSwitcher({
+				sourceFormId: 'selectDrill',
+				fields: fields,
+				title: 'Switch Keyboard Drill',
+				submitLabel: 'Start Selected Drill',
+				onSubmit: function(switchForm) { saveFormState(switchForm) }
+			})
 		}
 	}
 }

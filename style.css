@@ -679,6 +679,59 @@ pre {
 	background: rgba(17, 24, 29, 0.78);
 }
 
+.lesson-switcher {
+	display: grid;
+	gap: 0.75rem;
+	padding-top: 0.25rem;
+	border-top: 1px solid var(--surface-border);
+}
+
+.lesson-switcher-title {
+	text-align: center;
+	font-size: 0.88rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--muted-fg);
+}
+
+.lesson-switcher-form {
+	display: grid;
+	gap: 0.7rem;
+}
+
+.lesson-switcher-form ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 0.7rem;
+}
+
+.lesson-switcher-form li {
+	margin: 0;
+}
+
+.lesson-switcher-form select,
+.lesson-switcher-form input[type="text"],
+.lesson-switcher-form input[type="number"] {
+	width: 100%;
+}
+
+.lesson-switcher-form select[multiple] {
+	min-height: 10rem;
+}
+
+.lesson-switcher-form input[type="submit"],
+.lesson-switcher-form button {
+	width: 100%;
+}
+
+.lesson-switcher-form label {
+	display: block;
+	font-size: 0.96rem;
+}
+
 .clock {
 	font-size: clamp(2.4rem, 5vw, 3.5rem);
 	line-height: 1;

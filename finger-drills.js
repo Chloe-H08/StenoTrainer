@@ -94,6 +94,108 @@ function initializeFingerDrillForms() {
 	}
 }
 
+function mountFingerDrillSwitcher(fields) {
+	const nav = document.getElementById('nav')
+	if(!nav) return
+
+	const mode = fields.strokes ? 'custom' :
+		(fields.book === 'Stenotype Finger Technique' ? 'book' : 'duo')
+	const shell = N('section', {class: 'lesson-switcher'},
+		N('div', {class: 'lesson-switcher-title'}, 'Switch Finger Drill'))
+	const form = N('form', {class: 'lesson-switcher-form'})
+	const list = N('ul')
+
+	const modeSelect = N('select', {name: 'switch_mode'},
+		N('option', {value: 'duo'}, 'Dreaded Duo'),
+		N('option', {value: 'book'}, 'Stenotype Finger Technique'),
+		N('option', {value: 'custom'}, 'Custom Strokes'))
+	modeSelect.value = mode
+
+	const inputMode = N('select', {name: 'input_mode'},
+		N('option', {value: 'text'}, 'Plover / Text Input'),
+		N('option', {value: 'keyboard'}, 'Regular Keyboard'))
+	inputMode.value = fields.input_mode || (storageAvailable('localStorage') && localStorage.input_mode) || 'text'
+
+	const duoSection = N('select', {name: 'section'})
+	for(let i=0; i<dreadedDuo.length; ++i) {
+		N(duoSection, N('option', {value: i+1}, 'Section ' + (i+1)))
+	}
+	duoSection.value = fields.section || '1'
+
+	const bookSection = N('select', {name: 'book_section'})
+	const bookKeys = Object.keys(stenotypeFingerTechnique)
+	for(let i=0; i<bookKeys.length; ++i) {
+		const key = bookKeys[i]
+		N(bookSection, N('option', {value: key}, key))
+	}
+	bookSection.value = fields.section || bookKeys[0]
+
+	const customStrokes = N('input', {
+		type: 'text',
+		name: 'strokes',
+		value: fields.strokes || ''
+	})
+
+	const iterations = N('input', {
+		type: 'number',
+		name: 'iterations',
+		value: fields.iterations || 20,
+		step: 5,
+		min: 1
+	})
+
+	const duoGroup = N('li', {'data-switch-mode': 'duo'},
+		N('label', 'Section', duoSection))
+	const bookGroup = N('li', {'data-switch-mode': 'book'},
+		N('label', 'Section', bookSection))
+	const customGroup = N('li', {'data-switch-mode': 'custom'},
+		N('label', 'Strokes', customStrokes))
+
+	N(list,
+		N('li', N('label', 'Mode', modeSelect)),
+		duoGroup,
+		bookGroup,
+		customGroup,
+		N('li', N('label', 'Length / Iterations', iterations)),
+		N('li', N('label', 'Input Mode', inputMode)),
+		N('li', N('button', {type: 'submit'}, 'Start Selected Drill')))
+
+	form.appendChild(list)
+	shell.appendChild(form)
+	nav.appendChild(shell)
+
+	function syncMode() {
+		const groups = form.querySelectorAll('[data-switch-mode]')
+		for(let i=0; i<groups.length; ++i) {
+			const group = groups[i]
+			group.classList.toggle('is-hidden', group.getAttribute('data-switch-mode') !== modeSelect.value)
+		}
+	}
+
+	modeSelect.addEventListener('input', syncMode)
+	syncMode()
+
+	form.addEventListener('submit', function(evt) {
+		evt.preventDefault()
+		if(storageAvailable('localStorage')) localStorage.input_mode = inputMode.value
+		let url = 'finger-drills.html'
+		const parts = [
+			'input_mode=' + encodeURIComponent(inputMode.value),
+			'iterations=' + encodeURIComponent(iterations.value)
+		]
+		if(modeSelect.value === 'duo') {
+			parts.push('section=' + encodeURIComponent(duoSection.value))
+			parts.push('drill=1')
+		} else if(modeSelect.value === 'book') {
+			parts.push('book=' + encodeURIComponent('Stenotype Finger Technique'))
+			parts.push('section=' + encodeURIComponent(bookSection.value))
+		} else {
+			parts.push('strokes=' + encodeURIComponent(customStrokes.value))
+		}
+		window.location.href = url + '?' + parts.join('&')
+	})
+}
+
 function runFingerDrill(fields) {
 	fields.iterations = fields.iterations || 20;
 	fields.actualWords = {unit: 'strokes per minute', u: 'SPM'}
@@ -132,6 +234,7 @@ function runFingerDrill(fields) {
 	var next = document.getElementById('new');
 	if(fields.strokes || fields.book) next.parentNode.removeChild(next);
 	else linkNextDrill(next, fields);
+	mountFingerDrillSwitcher(fields)
 }
 
 window.onload = function() {

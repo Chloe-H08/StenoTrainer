@@ -66,15 +66,17 @@
 
 <script>
 window.onload = function() {
-	if(document.location.search === '') {
-		var form = document.getElementById('selectDrill');
-		var drill = form.elements.drill;
+	var form = document.getElementById('selectDrill');
+	var drill = form.elements.drill;
+	if(drill.options.length === 0) {
 		var order = TypeJig.WordSets.LearnPloverOrder;
 		for(var i=0; i<order.length; ++i) {
 			var option = document.createElement('option');
 			option.appendChild(document.createTextNode(order[i]));
 			drill.appendChild(option);
 		}
+	}
+	if(document.location.search === '') {
 		drill.focus();
 
 		loadFormState(form);
@@ -99,6 +101,13 @@ window.onload = function() {
 
 			displayOnly('lesson');
 			var jig = setExercise(exercise.name, exercise, hints, fields);
+			mountLessonSwitcher({
+				sourceFormId: 'selectDrill',
+				fields: fields,
+				title: 'Switch Plover Drill',
+				submitLabel: 'Start Selected Drill',
+				onSubmit: function(switchForm) { saveFormState(switchForm) }
+			})
 		}
 	}
 }

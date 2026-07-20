@@ -415,6 +415,88 @@ function hiddenField(form, name, value) {
 	else N(form, N('input', {type: 'hidden', name: name, value: value}))
 }
 
+function cloneFormWithoutIds(form) {
+	const clone = form.cloneNode(true)
+	const withIds = clone.querySelectorAll('[id]')
+	for(let i=0; i<withIds.length; ++i) withIds[i].removeAttribute('id')
+	if(clone.hasAttribute('id')) clone.removeAttribute('id')
+	return clone
+}
+
+function setFormValues(form, fields) {
+	if(!form || !fields) return
+	for(let i=0; i<form.elements.length; ++i) {
+		const element = form.elements[i]
+		if(!element.name) continue
+		const value = fields[element.name]
+		if(value == null) continue
+		if(element.tagName === 'SELECT' && element.multiple) {
+			const values = Array.isArray(value) ? value.map(String) : [String(value)]
+			for(let j=0; j<element.options.length; ++j) {
+				element.options[j].selected = values.indexOf(element.options[j].value) !== -1
+			}
+		} else if(element.type === 'checkbox') {
+			element.checked = value === true || value === 'yes' || value === '1' || value === 1
+		} else if(element.type === 'radio') {
+			element.checked = element.value === value
+		} else {
+			element.value = Array.isArray(value) ? value[0] : value
+		}
+	}
+}
+
+function formQueryString(form) {
+	const parts = []
+	for(let i=0; i<form.elements.length; ++i) {
+		const element = form.elements[i]
+		if(!element.name || element.disabled) continue
+		if((element.type === 'checkbox' || element.type === 'radio') && !element.checked) continue
+		if(element.tagName === 'SELECT' && element.multiple) {
+			for(let j=0; j<element.options.length; ++j) {
+				const option = element.options[j]
+				if(option.selected) {
+					parts.push(encodeURIComponent(element.name) + '=' + encodeURIComponent(option.value))
+				}
+			}
+		} else {
+			parts.push(encodeURIComponent(element.name) + '=' + encodeURIComponent(element.value))
+		}
+	}
+	return parts.join('&')
+}
+
+function mountLessonSwitcher(options) {
+	const nav = document.getElementById('nav')
+	const sourceForm = document.getElementById(options.sourceFormId)
+	if(!nav || !sourceForm) return null
+
+	const shell = N('section', {class: 'lesson-switcher'},
+		N('div', {class: 'lesson-switcher-title'}, options.title || 'Switch Drill'))
+	const form = cloneFormWithoutIds(sourceForm)
+	form.classList.add('lesson-switcher-form')
+	setFormValues(form, options.fields || {})
+	if(options.prepareForm) options.prepareForm(form, options.fields || {})
+
+	const submit = form.querySelector('button, input[type="submit"]')
+	if(submit) {
+		if(submit.tagName === 'INPUT') submit.value = options.submitLabel || 'Switch Drill'
+		else submit.textContent = options.submitLabel || 'Switch Drill'
+	}
+
+	form.addEventListener('submit', function(evt) {
+		evt.preventDefault()
+		if(options.prepareForm) options.prepareForm(form, options.fields || {})
+		if(options.onSubmit) options.onSubmit(form, options.fields || {})
+		const action = form.getAttribute('action') || window.location.pathname
+		const query = formQueryString(form)
+		window.location.href = query ? action + '?' + query : action
+	})
+
+	shell.appendChild(form)
+	nav.appendChild(shell)
+	return form
+}
+
 function tokenize(string, parsed) {
 	parsed ||= {}
 	parsed.tokens ||= []
