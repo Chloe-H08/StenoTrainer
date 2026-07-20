@@ -45,7 +45,8 @@ function TypeJig(exercise, display, results, input, clock, hint, options) {
 	this.enterCount = 0;
 
 	this.lookahead = 1000;
-	this.translationFor = TypeJig.shortestTranslations(TypeJig.Translations.Plover || {});
+	this.translations = TypeJig.Translations.Plover || {};
+	this.translationFor = TypeJig.shortestTranslations(this.translations);
 	this.inputMode = TypeJig.resolveInputMode(options);
 	this.expectedTransform = null;
 
@@ -143,11 +144,12 @@ TypeJig.prototype.setInputValue = function(value, timeStamp) {
 }
 
 TypeJig.prototype.expectedStenoFor = function(word) {
-	const exact = this.translationFor[word]
-	if(exact) return exact
-	const lower = this.translationFor[word.toLowerCase()]
-	if(lower) return lower
-	return word
+	const candidates = []
+	TypeJig.addExpectedStenoCandidates(candidates, this.translations[word])
+	TypeJig.addExpectedStenoCandidates(candidates, this.translations[word.toLowerCase()])
+	TypeJig.addExpectedStenoCandidates(candidates, TypeJig.pseudoStenoFor(word))
+	if(candidates.length === 0) return word
+	return TypeJig.uniqueStrings(candidates)
 }
 
 TypeJig.wordsAndSpaces = function(string) {
@@ -239,6 +241,61 @@ for(const alternate in TypeJig.alternateSpelling) {
 }
 
 TypeJig.matchExact = (a,b) => a === b
+
+TypeJig.uniqueStrings = function(values) {
+	const seen = new Set()
+	const result = []
+	for(let i=0; i<values.length; ++i) {
+		const value = values[i]
+		if(typeof value !== 'string' || value === '' || seen.has(value)) continue
+		seen.add(value)
+		result.push(value)
+	}
+	return result
+}
+
+TypeJig.addExpectedStenoCandidates = function(out, value) {
+	if(Array.isArray(value)) {
+		for(let i=0; i<value.length; ++i) out.push(value[i])
+	} else if(typeof value === 'string' && value !== '') {
+		out.push(value)
+	}
+}
+
+TypeJig.pseudoStenoFor = function(word) {
+	if(typeof pseudoStrokeToSteno !== 'function') return null
+	if(!/^[A-Za-z]+$/.test(word)) return null
+	const pseudo = word.toUpperCase()
+	const steno = pseudoStrokeToSteno(pseudo)
+	if(!steno) return null
+	const [left, vowels, right] = steno
+	const candidate = left + vowels + ((left === '' && vowels === '' && right !== '') ? '-' : '') + right
+	if(candidate === '' || candidate === pseudo) return null
+	return candidate
+}
+
+TypeJig.matchesExpected = function(actual, expected, matchFn) {
+	if(Array.isArray(expected)) {
+		for(let i=0; i<expected.length; ++i) {
+			if(matchFn(actual, expected[i])) return true
+		}
+		return false
+	}
+	return matchFn(actual, expected)
+}
+
+TypeJig.matchesExpectedPrefix = function(actual, expected) {
+	if(Array.isArray(expected)) {
+		for(let i=0; i<expected.length; ++i) {
+			const candidate = expected[i]
+			if(actual.length < candidate.length && actual === candidate.slice(0, actual.length)) {
+				return true
+			}
+		}
+		return false
+	}
+	return actual.length < expected.length && actual === expected.slice(0, actual.length)
+}
 
 TypeJig.matchOtherSpellings = (A,B) => {
 	const a = A.toLowerCase(), b = B.toLowerCase()
@@ -473,9 +530,8 @@ TypeJig.prototype.answerChanged = function() {
 		const A = actual.tokens[a], E = expected.tokens[a] || {text:''}
 		var ac = A.text, ex = E.text
 		const expectedComparable = this.expectedTransform ? this.expectedTransform(ex) : ex
-		match = this.match(ac, expectedComparable)
-		partial = endOfAnswer && ac.length < expectedComparable.length &&
-			ac === expectedComparable.slice(0, ac.length)
+		match = TypeJig.matchesExpected(ac, expectedComparable, this.match)
+		partial = endOfAnswer && TypeJig.matchesExpectedPrefix(ac, expectedComparable)
 		if(!(match || partial)) lastMismatch = a
 		if(match && a === this.lastMismatch) this.lastMismatch = -1
 
