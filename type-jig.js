@@ -791,6 +791,15 @@ TypeJig.TextInput.prototype.handleInput = function(ev) {
 	this.jig.queueChange(ev.timeStamp)
 }
 
+TypeJig.removeLastInputUnit = function(jig, timeStamp) {
+	let value = jig.input.value
+	if(value === '') return
+	value = value.replace(/\s+$/, '')
+	if(jig.actualWords) value = value.replace(/\S+$/, '')
+	else value = value.replace(/(?:^|\/)[^/\s]+$/, '')
+	jig.setInputValue(value, timeStamp)
+}
+
 TypeJig.TextInput.prototype.handleKeyDown = function(ev) {
 	if(ev.code !== 'Backspace' || ev.metaKey || ev.ctrlKey || ev.altKey) return
 	const active = document.activeElement
@@ -798,22 +807,9 @@ TypeJig.TextInput.prototype.handleKeyDown = function(ev) {
 		/^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName)
 	if(editingOtherControl) return
 
-	const input = this.jig.input
-	if(active !== input) this.jig.focusInput()
-
-	const start = (typeof input.selectionStart === 'number') ? input.selectionStart : input.value.length
-	const end = (typeof input.selectionEnd === 'number') ? input.selectionEnd : input.value.length
-	if(start === 0 && end === 0) return
-
 	ev.preventDefault()
-	if(start !== end) {
-		input.value = input.value.slice(0, start) + input.value.slice(end)
-		input.setSelectionRange(start, start)
-	} else {
-		input.value = input.value.slice(0, start - 1) + input.value.slice(end)
-		input.setSelectionRange(start - 1, start - 1)
-	}
-	this.jig.queueChange(ev.timeStamp)
+	if(active !== this.jig.input) this.jig.focusInput()
+	TypeJig.removeLastInputUnit(this.jig, ev.timeStamp)
 }
 
 TypeJig.TextInput.prototype.reset = function() {
@@ -963,12 +959,7 @@ TypeJig.KeyboardInput.prototype.commitWordBoundary = function(timeStamp) {
 }
 
 TypeJig.KeyboardInput.prototype.backspace = function(timeStamp) {
-	let value = this.jig.input.value
-	if(value === '') return
-	value = value.replace(/\s+$/, '')
-	if(this.jig.actualWords) value = value.replace(/\S+$/, '')
-	else value = value.replace(/(?:^|\/)[^/\s]+$/, '')
-	this.jig.setInputValue(value, timeStamp)
+	TypeJig.removeLastInputUnit(this.jig, timeStamp)
 }
 
 TypeJig.KeyboardInput.prototype.commitChord = function(timeStamp) {
