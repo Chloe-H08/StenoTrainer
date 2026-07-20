@@ -137,6 +137,8 @@ function loadFormState(form) {
     var loaded = load()
     if(loaded.drill != null) {
         form.drill.value = loaded.drill
+    } else if(form.drill.options.length > 0) {
+		form.drill.options[0].selected = true
     }
 	if(loaded.hints != null) form.hints.checked = !!loaded.hints
 	if(loaded.input_mode != null) form.input_mode.value = loaded.input_mode

@@ -161,6 +161,8 @@ function loadFormState(form) {
     var loaded = load();
     if (loaded.drill) {
         form.drill.value = loaded.drill;
+    } else if(form.drill.options.length > 0) {
+		form.drill.selectedIndex = 0;
     }
 	if(loaded.count) {
 		form.count.value = loaded.count

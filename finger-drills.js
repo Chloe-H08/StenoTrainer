@@ -73,6 +73,7 @@ function populateFingerDrillOptions() {
 		for(let i=0; i<dreadedDuo.length; ++i) {
 			N(duo, N('option', {value: i+1}, 'Section ' + (i+1)))
 		}
+		if(duo.options.length > 0) duo.selectedIndex = 0
 	}
 
 	const book = document.getElementById('book_section')
@@ -82,6 +83,7 @@ function populateFingerDrillOptions() {
 			const key = keys[i]
 			N(book, N('option', {value: key}, key))
 		}
+		if(book.options.length > 0) book.selectedIndex = 0
 	}
 }
 

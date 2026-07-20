@@ -475,6 +475,21 @@ function mountLessonSwitcher(options) {
 	const form = cloneFormWithoutIds(sourceForm)
 	form.classList.add('lesson-switcher-form')
 	setFormValues(form, options.fields || {})
+	if(options.compactMultiSelectNames) {
+		for(let i=0; i<options.compactMultiSelectNames.length; ++i) {
+			const name = options.compactMultiSelectNames[i]
+			const element = form.elements[name]
+			if(element && element.tagName === 'SELECT' && element.multiple) {
+				element.multiple = false
+				element.removeAttribute('multiple')
+				element.removeAttribute('size')
+				const current = options.fields && options.fields[name]
+				if(Array.isArray(current) && current.length > 0) {
+					element.value = current[0]
+				}
+			}
+		}
+	}
 	if(options.prepareForm) options.prepareForm(form, options.fields || {})
 
 	const submit = form.querySelector('button, input[type="submit"]')
