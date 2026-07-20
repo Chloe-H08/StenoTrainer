@@ -15,7 +15,68 @@
 </head>
 <body>
 
-<div id="lesson" class="wrapper">
+<div id="form" class="wrapper">
+	<div class="page-kicker">Finger Drills</div>
+	<h1>Choose a finger drill setup.</h1>
+	<p class="intro-copy">Pick a Dreaded Duo section, run a Stenotype Finger Technique pattern, or repeat your own stroke string. The drill still supports both Plover/text input and the regular keyboard mode.</p>
+
+	<div class="form-section">
+		<div class="caption"><strong>Input</strong> settings</div><br>
+		<label>Input Mode:
+			<select id="setup_input_mode" name="input_mode">
+				<option value="text">Plover / Text Input</option>
+				<option value="keyboard">Regular Keyboard</option>
+			</select>
+		</label>
+		<small>Regular Keyboard captures steno chords directly. Use space to finish each word.</small>
+	</div>
+
+	<div class="form-section">
+		<div class="caption">Da Dreaded Dueling Digit Duo <strong>Finger Drills</strong></div>
+		<form class="drill-options" id="dreaded-duo-form" action="finger-drills.html">
+			<label>Section
+				<select id="duo_section" name="section"></select>
+			</label><br><br>
+			<label>Alternate
+				<input type="number" name="iterations" value="20" step="5" min="5">
+			</label>
+			times.<br><br>
+			<button>Start Dreaded Duo &rarr;</button>
+		</form>
+	</div>
+
+	<div class="form-section">
+		<div class="caption"><strong>Stenotype Finger Technique</strong></div>
+		<form class="drill-options" id="book-form" action="finger-drills.html">
+			<input type="hidden" name="book" value="Stenotype Finger Technique">
+			<label>Section
+				<select id="book_section" name="section"></select>
+			</label><br><br>
+			<label>Alternate
+				<input type="number" name="iterations" value="20" step="5" min="5">
+			</label>
+			times.<br><br>
+			<button>Start Technique Drill &rarr;</button>
+		</form>
+	</div>
+
+	<div class="form-section">
+		<div class="caption">Custom <strong>Finger Drills</strong></div>
+		<form class="drill-options" id="custom-finger-form" action="finger-drills.html">
+			<label>Repeat strokes
+				<input type="text" name="strokes" size="24">
+			</label><br><br>
+			<label>Iterations
+				<input type="number" name="iterations" value="20" step="5" min="1">
+			</label>
+			rounds.<br>
+			<small>Example: <code>EFPLT/EFPLS/EFPLTS EBGD/EBGZ/EBGDZ</code>. Use slashes inside a set and spaces between sets.</small><br>
+			<button>Start Custom Finger Drill &rarr;</button>
+		</form>
+	</div>
+</div>
+
+<div id="lesson" class="wrapper" style="display: none">
 	<div id="leftside">
 		<div class="page-kicker center">Rhythm Work</div>
 		<h3 id="lesson-name" class="center"></h3>

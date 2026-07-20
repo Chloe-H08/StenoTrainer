@@ -3,6 +3,7 @@ function parseQueryString(query) {
 	query = query.substring(1);  // remove leading '?'
 	var pairs = query.replace(/\+/g,'%20').split('&');
 	for(var i=0; i<pairs.length; ++i) {
+		if(pairs[i] === '') continue;
 		var name, value='';
 		var n = pairs[i].indexOf('=');
 		if(n === -1) name = decodeURIComponent(pairs[i]);
@@ -244,7 +245,7 @@ function loadSettings() {
 
 const APP_NAV_ITEMS = [
 	{ href: 'index.html', label: 'Home', description: 'Start here' },
-	{ href: 'form.html', label: 'Drill Library', description: 'Mixed drills and custom practice' },
+	{ href: 'form.html', label: 'Drill Setups', description: 'Custom text, reading, quotes, and more' },
 	{ href: 'intro.html', label: 'Intro Lessons', description: 'Foundations and first drills' },
 	{ href: 'learn-keyboard.html', label: 'Keyboard Practice', description: 'Map keys and chords' },
 	{ href: 'learn-plover.html', label: 'Learn Plover', description: 'Theory-focused lessons' },

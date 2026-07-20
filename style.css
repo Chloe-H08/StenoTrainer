@@ -259,6 +259,16 @@ p {
 	gap: 1.3rem;
 }
 
+.home-section {
+	display: grid;
+	gap: 0.95rem;
+}
+
+.home-section-header h2 {
+	margin: 0.2rem 0 0;
+	font-size: clamp(1.6rem, 3vw, 2.3rem);
+}
+
 .hero-card {
 	background: linear-gradient(135deg, rgba(255, 249, 240, 0.98), rgba(255, 241, 227, 0.9));
 	border: 1px solid var(--surface-border);
@@ -393,6 +403,27 @@ ul {
 form.drill-options,
 #selectDrill {
 	margin: 0.4rem 0 0;
+}
+
+.is-hidden {
+	display: none !important;
+}
+
+.mode-back-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	margin-top: 0.2rem;
+	font-weight: 700;
+}
+
+.mode-summary {
+	margin-top: 0.75rem;
+	padding: 0.85rem 1rem;
+	border-radius: 1rem;
+	background: rgba(255, 255, 255, 0.56);
+	border: 1px solid var(--surface-border);
+	color: var(--muted-fg);
 }
 
 label {

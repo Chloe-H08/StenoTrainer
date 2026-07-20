@@ -17,9 +17,10 @@
 <body>
 
 <div id="form" class="wrapper">
-	<div class="page-kicker">Lesson Library</div>
-	<h1>Choose a drill...</h1>
-	<p class="intro-copy">Build a practice session from guided lessons, sentence sources, finger drills, or your own custom text. The shared settings at the top carry across the rest of the catalog.</p>
+	<div id="form-kicker" class="page-kicker">Drill Setups</div>
+	<h1 id="form-title">Choose a drill...</h1>
+	<p id="form-intro" class="intro-copy">Build a practice session from guided lessons, sentence sources, and focused word work. The shared settings at the top carry across the rest of the catalog.</p>
+	<p id="mode-back-link" class="is-hidden"><a class="mode-back-link" href="index.html">&larr; Back to Home</a></p>
 
 	<div class="form-section">
 		<div class="caption"><strong>Settings</strong> that apply to all drills</div><br>
@@ -63,7 +64,7 @@
 	</div>
 
 
-	<div class="form-section">
+	<div class="form-section" data-mode="custom-text">
 		<div class="caption">Custom <strong>text</strong></div>
 
 		<form class="drill-options" id="custom" action="form.html">
@@ -77,7 +78,7 @@
 		</form>
 	</div>
 
-	<div class="form-section">
+	<div class="form-section" data-mode="custom-finger">
 		<div class="caption">Custom <strong>Finger Drills</strong></div>
 
 		<form class="drill-options" action="finger-drills.html">
@@ -90,7 +91,7 @@
 	</div>
 
 
-	<div class="form-section">
+	<div class="form-section" data-mode="most-used">
 		<div class="caption">Most used <strong>words</strong> (once, in random order)</div>
 
 		<form id="most-used" class="drill-options" action="form.html">
@@ -109,7 +110,7 @@
 		</form>
 	</div>
 
-	<div class="form-section">
+	<div class="form-section" data-mode="gutenberg">
 		<div class="caption"><strong>Sentences</strong> extracted from <a href="https://www.gutenberg.org/">Project Gutenberg</a></div>
 
 		<form class="drill-options" action="short-sentences.html">
@@ -136,7 +137,7 @@
 		</form>
 	</div>
 
-	<div class="form-section">
+	<div class="form-section" data-mode="markov">
 		<div class="caption">Randomly generated <strong>sentences</strong> using words from a <a href="https://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/Contemporary_fiction">Wiktionary top 2000 list</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA 3.0</a>) and sentence data from <a href="https://tatoeba.org">Tatoeba</a> (<a href="https://creativecommons.org/licenses/by/2.0/fr/">CC-BY 2.0 fr</a>)</div>
 
 		<form class="drill-options" action="markov.html">
@@ -152,7 +153,7 @@
 		</form>
 	</div>
 
-	<div class="form-section">
+	<div class="form-section" data-mode="emily">
 		<div class="caption">Emily's Symbol Dictionary (with spacing)</div>
 
 		<form class="drill-options" action="emilySymbols.html">
@@ -168,7 +169,7 @@
 		</form>
 	</div>
 
-	<div class="form-section">
+	<div class="form-section" data-mode="quotes">
 		<div class="caption"><strong>Quotes</strong> from <a href="https://github.com/Miodec/monkeytype/blob/master/static/quotes/english.json">Monkeytype</a>.</div>
 
 		<form class="drill-options" action="monkeytype-quote.html">
@@ -184,7 +185,7 @@
 		</form>
 	</div>
 
-	<div class="form-section">
+	<div class="form-section" data-mode="phonetic">
 		<div class="caption">Phonetic <strong>words</strong> that use exactly one starting <strong>consonant</strong> key, exactly one <strong>vowel</strong> key and exactly one ending <strong>consonant</strong>.</div>
 
 		<form class="drill-options" action="form.html">
@@ -200,7 +201,7 @@
 		</form>
 	</div>
 
-	<div class="form-section">
+	<div class="form-section" data-mode="numbers">
 		<div class="caption"><strong>Numbers</strong> 1-99 in simple sentences</div>
 
 		<form class="drill-options" action="form.html">
@@ -216,7 +217,7 @@
 		</form>
 	</div>
 
-	<div class="form-section">
+	<div class="form-section" data-mode="dreaded-duo">
 		<div class="caption">Da Dreaded Dueling Digit Duo <strong>Finger Drills</strong></div>
 
 		<form class="drill-options" action="finger-drills.html">
@@ -229,7 +230,7 @@
 		</form>
 	</div>
 
-	<div class="form-section">
+	<div class="form-section" data-mode="specials">
 		<div class="caption">Other drills.</div>
 		<ul>
 			<li><a href="two-key.html">Sentences which (mostly) only use two keys at once</a></li>
@@ -271,6 +272,75 @@
 </div>
 
 <script>
+const MODE_CONFIG = {
+	'custom-text': {
+		kicker: 'Custom Drill',
+		title: 'Set up a custom text drill',
+		intro: 'Paste exactly what you want to practice, then keep the shared settings above or tune them before you start.',
+		visibleModes: ['custom-text'],
+	},
+	'custom-finger': {
+		kicker: 'Stroke Repeats',
+		title: 'Set up a custom finger drill',
+		intro: 'Repeat your own stroke strings from a focused setup screen. For Dreaded Duo sections and book patterns, use the dedicated Finger Drills page.',
+		visibleModes: ['custom-finger'],
+	},
+	'most-used': {
+		kicker: 'Vocabulary',
+		title: 'Set up a most-used words drill',
+		intro: 'Pick the range and total word count, then launch a focused frequency-list session.',
+		visibleModes: ['most-used'],
+	},
+	'gutenberg': {
+		kicker: 'Reading',
+		title: 'Set up a Gutenberg sentence drill',
+		intro: 'Choose the vocabulary cutoff and reading length for extracted book sentences.',
+		visibleModes: ['gutenberg'],
+	},
+	'markov': {
+		kicker: 'Generated',
+		title: 'Set up a generated sentence drill',
+		intro: 'Choose the session length and start a randomized reading drill built from fiction-frequency data.',
+		visibleModes: ['markov'],
+	},
+	'emily': {
+		kicker: 'Symbols',
+		title: 'Set up an Emily Symbols drill',
+		intro: 'Choose the drill length for symbol practice from a dedicated setup page.',
+		visibleModes: ['emily'],
+	},
+	'quotes': {
+		kicker: 'Quotes',
+		title: 'Set up a Monkeytype quote drill',
+		intro: 'Choose the quote lengths you want to include, then start a focused quote session.',
+		visibleModes: ['quotes'],
+	},
+	'phonetic': {
+		kicker: 'Phonetics',
+		title: 'Set up a single-stroke CVC drill',
+		intro: 'Launch a timed drill of simple consonant-vowel-consonant words from this dedicated setup.',
+		visibleModes: ['phonetic'],
+	},
+	'numbers': {
+		kicker: 'Numbers',
+		title: 'Set up a number sentence drill',
+		intro: 'Choose your drill time and jump straight into number-based practice.',
+		visibleModes: ['numbers'],
+	},
+	'dreaded-duo': {
+		kicker: 'Finger Drills',
+		title: 'Set up Dreaded Duo finger drills',
+		intro: 'Choose a section and repetition count for Da Dreaded Dueling Digit Duo. The dedicated Finger Drills page also includes custom stroke and book options.',
+		visibleModes: ['dreaded-duo'],
+	},
+	'specials': {
+		kicker: 'Specialty Drills',
+		title: 'Open specialty drill links',
+		intro: 'Jump into the smaller specialty drills from one focused page.',
+		visibleModes: ['specials'],
+	},
+}
+
 function runExercise(fields) {
 	if(fields.drill === 'NumberSentences') exercise = numberSentences(fields);
 	else {
@@ -293,6 +363,21 @@ function runExercise(fields) {
 
 		displayOnly('lesson');
 		return setExercise(exercise.name, exercise, hints, options);
+	}
+}
+
+function configureCatalogMode(mode) {
+	const config = MODE_CONFIG[mode]
+	if(!config) return
+	document.getElementById('form-kicker').textContent = config.kicker
+	document.getElementById('form-title').textContent = config.title
+	document.getElementById('form-intro').textContent = config.intro
+	document.getElementById('mode-back-link').classList.remove('is-hidden')
+
+	const sections = document.querySelectorAll('#form .form-section[data-mode]')
+	for(const section of sections) {
+		const visible = config.visibleModes.indexOf(section.dataset.mode) !== -1
+		section.classList.toggle('is-hidden', !visible)
 	}
 }
 
@@ -342,9 +427,18 @@ function runCustom(evt) {
 	var jig = runExercise(fields);
 }
 
+function hasExerciseQuery(fields) {
+	for(const key in fields) {
+		if(key !== 'mode') return true
+	}
+	return false
+}
+
 window.onload = function() {
-	if(document.location.search !== '') {
-		runExercise(parseQueryString(document.location.search));
+	const fields = parseQueryString(document.location.search)
+	if(fields.mode) configureCatalogMode(fields.mode)
+	if(hasExerciseQuery(fields)) {
+		runExercise(fields);
 	} else {
 		// Add event listeners to get settings before submitting.
 		var forms = document.querySelectorAll('form');
