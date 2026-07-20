@@ -25,6 +25,12 @@
 				<ul style="list-style-type: none">
 					<li><select name="drill" multiple></select></li>
 					<li><label><input name="hints" type="checkbox" value="yes" checked> Show hints?</label></li>
+					<li><label>Input mode:
+						<select id="input_mode" name="input_mode">
+							<option value="text">Plover / Text Input</option>
+							<option value="keyboard">Regular Keyboard</option>
+						</select>
+					</label></li>
 					<li><label>Randomly</label> for <input name="timeLimit" type="text" size="2", value="1"> minutes.</li>
 					<li><label><input name="wpm" type="number" value="" step="5"> Speed (WPM).</label></li>
 					<li><input type="submit" value="Go"></li>
@@ -112,6 +118,7 @@ function saveFormState(form) {
     save({
         drill: form.drill.value,
         hints: form.hints.checked,
+        input_mode: form.input_mode.value,
         timeLimit: form.timeLimit.value,
     })
 }
@@ -122,6 +129,7 @@ function loadFormState(form) {
         form.drill.value = loaded.drill
     }
 	if(loaded.hints != null) form.hints.checked = !!loaded.hints
+	if(loaded.input_mode != null) form.input_mode.value = loaded.input_mode
     if (loaded.timeLimit) {
         form.timeLimit.value = loaded.timeLimit
     }

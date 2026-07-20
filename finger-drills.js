@@ -68,6 +68,18 @@ window.onload = function() {
 
 	var jig = setExercise(exercise.name, exercise, null, fields);
 
+	const inputMode = document.getElementById('input_mode');
+	if(inputMode) {
+		const currentMode = fields.input_mode || (storageAvailable('localStorage') && localStorage.input_mode) || 'text'
+		inputMode.value = currentMode
+		inputMode.addEventListener('input', function(evt) {
+			const mode = evt.target.value
+			if(storageAvailable('localStorage')) localStorage.input_mode = mode
+			const url = updateURLParameter(window.location.href, 'input_mode', mode)
+			window.location.href = url
+		})
+	}
+
 	var next = document.getElementById('new');
 	if(fields.strokes || fields.book) next.parentNode.removeChild(next);
 	else linkNextDrill(next, fields);
