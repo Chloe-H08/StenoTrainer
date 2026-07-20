@@ -1,41 +1,13 @@
-Steno Jig
-=========
+Steno Trainer
+=============
 
-This is a little browser-based widget for typing drills. I'm using
-it to teach myself stenotype. It's still early in development, but
-you may find it useful and/or fun. I have it set up with only a
-`gh-pages` branch which means it will show up on the web at:
-https://joshuagrams.github.io/steno-jig/
+This repo is my fork of Joshua Grams's `steno-jig`.
 
-`index.html` has the basic structure you need to use it: for basic
-exercises you can pass an array of strings (each of which *must*
-be a single word with no leading or trailing whitespace or the
-answer matching won't work).
+I made it because I wanted a way to try steno on a regular QWERTY keyboard without needing to fully commit to a steno setup first. The main goal of this fork is to make it easier to learn the keyboard layout, practice basic chord patterns, and try simple real-word drills before deciding whether to keep going with steno and eventually set up Plover.
 
-If the words represent a static text (i.e. a sequence of words in
-a particular order), that's all you need. If you want to set a
-time limit, you can also pass a number of seconds. If you pass
-`true` as the third argument, the words will be randomized and
-recycled until the time runs out.
+I also revamped the web design to make the app feel more modern and easier to navigate.
+I also started revamping the web design to make the app feel more modern and easier to navigate, though it's still a work in progress and not as clean as I want it to be yet.
 
-I have a bunch of existing word sets in `word-sets.js`. One of
-these sets is the New General Service List: 2800 root words in
-common use, aimed at ESL students. It's organized as a set of root
-words with variations, so I've kept the base set that way, and set
-the code up so that each entry can be an array of words instead of
-just a single word. In this case, it will randomly shuffle the
-entries, and then randomly choose from the words in the current
-entry. But it may be better to use the `NGSL_all_forms` list which
-has been flattened and sorted by frequency.
+The original lesson and drill structure from `steno-jig` is still the foundation of this project, but the QWERTY input mode is the reason I created this fork.
 
-There are also a bunch of translations in `plover-translations.js` so it
-can display hints for the next word. Many words have more than one set
-of legitimate strokes, and it will show all of them unless you filter
-the given options with `TypeJig.longestTranslations` or
-`TypeJig.shortestTranslations`.
-
------
-
-`numbers.html` has a more complex example which overrides the
-exercise's `nextWord` function to generate a sentence at a time
-and spit out random sentences with lots of numbers in them.
+That said, the QWERTY approach is still a bit finicky on some of the longer drills. I'm still working on improving that and making the regular keyboard option more reliable across the longer practice modes on the site. If you want the most reliable experience for actual steno writing, getting Plover is probably the better option. The regular keyboard option is best as a low-friction way to learn the layout, get a feel for steno, and decide whether you want to continue.
