@@ -749,8 +749,8 @@ TypeJig.KeyboardInput = function(jig) {
 	this.onKeyUp = this.handleKeyUp.bind(this)
 	this.onBlur = this.handleBlur.bind(this)
 	this.onVisibility = this.handleVisibilityChange.bind(this)
-	bindEvent(window, 'keydown', this.onKeyDown)
-	bindEvent(window, 'keyup', this.onKeyUp)
+	bindEvent(document, 'keydown', this.onKeyDown)
+	bindEvent(document, 'keyup', this.onKeyUp)
 	bindEvent(window, 'blur', this.onBlur)
 	bindEvent(document, 'visibilitychange', this.onVisibility)
 }
@@ -767,6 +767,15 @@ TypeJig.KeyboardInput.keyMap = {
 	KeyU: '-F', KeyJ: '-R', KeyI: '-P', KeyK: '-B', KeyO: '-L',
 	KeyL: '-G', KeyP: '-T', Semicolon: '-S', BracketLeft: '-D', Quote: '-Z'
 }
+TypeJig.KeyboardInput.keyAliases = {
+	q: 'S', a: 'S',
+	w: 'T', s: 'K', e: 'P', d: 'W', r: 'H', f: 'R',
+	c: 'A', v: 'O',
+	t: '*', g: '*', y: '*', h: '*',
+	n: 'E', m: 'U',
+	u: '-F', j: '-R', i: '-P', k: '-B', o: '-L',
+	l: '-G', p: '-T', ';': '-S', '[': '-D', "'": '-Z'
+}
 
 TypeJig.KeyboardInput.prototype.clearState = function() {
 	this.pressedKeys.clear()
@@ -779,8 +788,8 @@ TypeJig.KeyboardInput.prototype.reset = function() {
 }
 
 TypeJig.KeyboardInput.prototype.destroy = function() {
-	unbindEvent(window, 'keydown', this.onKeyDown)
-	unbindEvent(window, 'keyup', this.onKeyUp)
+	unbindEvent(document, 'keydown', this.onKeyDown)
+	unbindEvent(document, 'keyup', this.onKeyUp)
 	unbindEvent(window, 'blur', this.onBlur)
 	unbindEvent(document, 'visibilitychange', this.onVisibility)
 }
@@ -793,18 +802,25 @@ TypeJig.KeyboardInput.prototype.handleBlur = function() {
 	this.clearState()
 }
 
-TypeJig.KeyboardInput.prototype.lookupLogicalKey = function(code) {
-	return TypeJig.KeyboardInput.keyMap[code] || null
+TypeJig.KeyboardInput.prototype.lookupLogicalKey = function(ev) {
+	if(TypeJig.KeyboardInput.keyMap[ev.code]) return TypeJig.KeyboardInput.keyMap[ev.code]
+	const key = (ev.key || '').toLowerCase()
+	return TypeJig.KeyboardInput.keyAliases[key] || null
+}
+
+TypeJig.KeyboardInput.prototype.physicalKeyId = function(ev) {
+	return ev.code || ('key:' + (ev.key || ''))
 }
 
 TypeJig.KeyboardInput.prototype.handleKeyDown = function(ev) {
-	const logical = this.lookupLogicalKey(ev.code)
+	const logical = this.lookupLogicalKey(ev)
 	if(logical) {
 		ev.preventDefault()
-		if(ev.repeat || this.pressedKeys.has(ev.code)) return
-		this.pressedKeys.add(ev.code)
+		const physical = this.physicalKeyId(ev)
+		if(ev.repeat || this.pressedKeys.has(physical)) return
+		this.pressedKeys.add(physical)
 		if(!this.logicalKeys.has(logical)) this.logicalKeys.set(logical, new Set())
-		this.logicalKeys.get(logical).add(ev.code)
+		this.logicalKeys.get(logical).add(physical)
 		return
 	}
 	if(ev.repeat) return
@@ -825,13 +841,14 @@ TypeJig.KeyboardInput.prototype.handleKeyDown = function(ev) {
 }
 
 TypeJig.KeyboardInput.prototype.handleKeyUp = function(ev) {
-	const logical = this.lookupLogicalKey(ev.code)
+	const logical = this.lookupLogicalKey(ev)
 	if(!logical) return
 	ev.preventDefault()
-	this.pressedKeys.delete(ev.code)
+	const physical = this.physicalKeyId(ev)
+	this.pressedKeys.delete(physical)
 	const sources = this.logicalKeys.get(logical)
 	if(sources) {
-		sources.delete(ev.code)
+		sources.delete(physical)
 		if(sources.size === 0) this.logicalKeys.delete(logical)
 	}
 	if(this.pressedKeys.size === 0) this.commitChord(ev.timeStamp)
