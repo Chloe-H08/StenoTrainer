@@ -782,10 +782,37 @@ TypeJig.prototype.updateCursor = function(evt) {
 TypeJig.TextInput = function(jig) {
 	this.jig = jig
 	this.onInput = this.handleInput.bind(this)
+	this.onKeyDown = this.handleKeyDown.bind(this)
 	bindEvent(jig.input, 'input', this.onInput)
+	bindEvent(document, 'keydown', this.onKeyDown)
 }
 
 TypeJig.TextInput.prototype.handleInput = function(ev) {
+	this.jig.queueChange(ev.timeStamp)
+}
+
+TypeJig.TextInput.prototype.handleKeyDown = function(ev) {
+	if(ev.code !== 'Backspace' || ev.metaKey || ev.ctrlKey || ev.altKey) return
+	const active = document.activeElement
+	const editingOtherControl = active && active !== this.jig.input &&
+		/^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName)
+	if(editingOtherControl) return
+
+	const input = this.jig.input
+	if(active !== input) this.jig.focusInput()
+
+	const start = (typeof input.selectionStart === 'number') ? input.selectionStart : input.value.length
+	const end = (typeof input.selectionEnd === 'number') ? input.selectionEnd : input.value.length
+	if(start === 0 && end === 0) return
+
+	ev.preventDefault()
+	if(start !== end) {
+		input.value = input.value.slice(0, start) + input.value.slice(end)
+		input.setSelectionRange(start, start)
+	} else {
+		input.value = input.value.slice(0, start - 1) + input.value.slice(end)
+		input.setSelectionRange(start - 1, start - 1)
+	}
 	this.jig.queueChange(ev.timeStamp)
 }
 
@@ -795,6 +822,7 @@ TypeJig.TextInput.prototype.reset = function() {
 
 TypeJig.TextInput.prototype.destroy = function() {
 	unbindEvent(this.jig.input, 'input', this.onInput)
+	unbindEvent(document, 'keydown', this.onKeyDown)
 }
 
 TypeJig.KeyboardInput = function(jig) {
