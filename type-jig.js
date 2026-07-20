@@ -745,6 +745,7 @@ TypeJig.KeyboardInput = function(jig) {
 	this.jig = jig
 	this.pressedKeys = new Set()
 	this.logicalKeys = new Map()
+	this.commitTimer = null
 	this.onKeyDown = this.handleKeyDown.bind(this)
 	this.onKeyUp = this.handleKeyUp.bind(this)
 	this.onBlur = this.handleBlur.bind(this)
@@ -778,6 +779,10 @@ TypeJig.KeyboardInput.keyAliases = {
 }
 
 TypeJig.KeyboardInput.prototype.clearState = function() {
+	if(this.commitTimer != null) {
+		clearTimeout(this.commitTimer)
+		this.commitTimer = null
+	}
 	this.pressedKeys.clear()
 	this.logicalKeys.clear()
 }
@@ -802,6 +807,14 @@ TypeJig.KeyboardInput.prototype.handleBlur = function() {
 	this.clearState()
 }
 
+TypeJig.KeyboardInput.prototype.scheduleCommit = function(timeStamp) {
+	if(this.commitTimer != null) clearTimeout(this.commitTimer)
+	this.commitTimer = setTimeout(() => {
+		this.commitTimer = null
+		if(this.logicalKeys.size > 0) this.commitChord(timeStamp)
+	}, 120)
+}
+
 TypeJig.KeyboardInput.prototype.lookupLogicalKey = function(ev) {
 	if(TypeJig.KeyboardInput.keyMap[ev.code]) return TypeJig.KeyboardInput.keyMap[ev.code]
 	const key = (ev.key || '').toLowerCase()
@@ -821,6 +834,7 @@ TypeJig.KeyboardInput.prototype.handleKeyDown = function(ev) {
 		this.pressedKeys.add(physical)
 		if(!this.logicalKeys.has(logical)) this.logicalKeys.set(logical, new Set())
 		this.logicalKeys.get(logical).add(physical)
+		this.scheduleCommit(ev.timeStamp)
 		return
 	}
 	if(ev.repeat) return
@@ -850,6 +864,10 @@ TypeJig.KeyboardInput.prototype.handleKeyUp = function(ev) {
 	if(sources) {
 		sources.delete(physical)
 		if(sources.size === 0) this.logicalKeys.delete(logical)
+	}
+	if(this.commitTimer != null && this.pressedKeys.size === 0) {
+		clearTimeout(this.commitTimer)
+		this.commitTimer = null
 	}
 	if(this.pressedKeys.size === 0) this.commitChord(ev.timeStamp)
 }
