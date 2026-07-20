@@ -812,7 +812,7 @@ TypeJig.KeyboardInput.prototype.scheduleCommit = function(timeStamp) {
 	this.commitTimer = setTimeout(() => {
 		this.commitTimer = null
 		if(this.logicalKeys.size > 0) this.commitChord(timeStamp)
-	}, 120)
+	}, 40)
 }
 
 TypeJig.KeyboardInput.prototype.lookupLogicalKey = function(ev) {
