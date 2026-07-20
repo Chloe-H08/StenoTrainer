@@ -83,7 +83,7 @@ function setExercise(name, exercise, hints, options, jig) {
 		jig = new TypeJig(exercise, 'exercise', 'results', 'input', 'clock', hints, options);
 
 		var back = document.getElementById('back');
-		back.href = document.location.href.replace(/\?.*$/, '').replace(/\/[^\/]*$/,'') + '/index.html';
+		back.href = appRoute('index.html');
 		var again = document.getElementById('again');
 		again.href = document.location.href;
 		again.addEventListener('click', function(evt) {
@@ -244,14 +244,20 @@ function loadSettings() {
 }
 
 const APP_NAV_ITEMS = [
-	{ href: 'index.html', label: 'Home', description: 'Start here' },
-	{ href: 'form.html', label: 'Drill Setups', description: 'Custom text, reading, quotes, and more' },
-	{ href: 'intro.html', label: 'Intro Lessons', description: 'Foundations and first drills' },
-	{ href: 'learn-keyboard.html', label: 'Keyboard Practice', description: 'Map keys and chords' },
-	{ href: 'learn-plover.html', label: 'Learn Plover', description: 'Theory-focused lessons' },
-	{ href: 'finger-drills.html', label: 'Finger Drills', description: 'Rhythm and repetition work' },
-	{ href: 'raw-steno-instructions.html', label: 'Raw Input Guide', description: 'Plover setup notes' },
+	{ page: 'index.html', label: 'Home', description: 'Start here' },
+	{ page: 'form.html', label: 'Drill Setups', description: 'Custom text, reading, quotes, and more' },
+	{ page: 'intro.html', label: 'Intro Lessons', description: 'Foundations and first drills' },
+	{ page: 'learn-keyboard.html', label: 'Keyboard Practice', description: 'Map keys and chords' },
+	{ page: 'learn-plover.html', label: 'Learn Plover', description: 'Theory-focused lessons' },
+	{ page: 'finger-drills.html', label: 'Finger Drills', description: 'Rhythm and repetition work' },
+	{ page: 'raw-steno-instructions.html', label: 'Raw Input Guide', description: 'Plover setup notes' },
 ]
+
+function appRoute(page) {
+	const inPagesDir = /\/pages\/[^/]+$/.test(window.location.pathname)
+	if(page === 'index.html') return inPagesDir ? '../index.html' : 'index.html'
+	return inPagesDir ? page : 'pages/' + page
+}
 
 function currentPageName() {
 	const path = window.location.pathname
@@ -275,7 +281,7 @@ function initAppChrome() {
 		N('span', {class: 'menu-toggle-line'}))
 
 	const homeButton = N('a', {
-		href: 'index.html',
+		href: appRoute('index.html'),
 		class: 'home-toggle',
 		'aria-label': 'Go to home page',
 		title: 'Home',
@@ -288,9 +294,9 @@ function initAppChrome() {
 
 	const current = currentPageName()
 	const navLinks = APP_NAV_ITEMS.map(item => {
-		const active = current === item.href
+		const active = current === item.page
 		return N('a', {
-			href: item.href,
+			href: appRoute(item.page),
 			class: 'app-nav-link' + (active ? ' active' : ''),
 		}, N('span', {class: 'app-nav-label'}, item.label),
 			N('span', {class: 'app-nav-description'}, item.description))
