@@ -274,6 +274,13 @@ function initAppChrome() {
 		N('span', {class: 'menu-toggle-line'}),
 		N('span', {class: 'menu-toggle-line'}))
 
+	const homeButton = N('a', {
+		href: 'index.html',
+		class: 'home-toggle',
+		'aria-label': 'Go to home page',
+		title: 'Home',
+	}, 'Home')
+
 	const overlay = N('div', {
 		class: 'menu-overlay',
 		click: () => closeSidebar(),
@@ -302,6 +309,7 @@ function initAppChrome() {
 		N('nav', {class: 'app-nav'}, navLinks))
 
 	document.body.appendChild(button)
+	document.body.appendChild(homeButton)
 	document.body.appendChild(overlay)
 	document.body.appendChild(sidebar)
 

@@ -164,6 +164,24 @@ p {
 	place-items: center;
 }
 
+.home-toggle {
+	position: fixed;
+	top: 1.2rem;
+	left: 4.7rem;
+	z-index: 50;
+	height: 3rem;
+	padding: 0 1rem;
+	border: 1px solid var(--surface-border);
+	border-radius: 999px;
+	background: rgba(255, 250, 242, 0.92);
+	box-shadow: 0 12px 26px rgba(34, 47, 62, 0.16);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	color: var(--main-fg);
+}
+
 .menu-toggle-line {
 	display: block;
 	width: 1.1rem;
@@ -205,6 +223,10 @@ p {
 .sidebar-open .menu-overlay {
 	opacity: 1;
 	pointer-events: auto;
+}
+
+.home-toggle:hover {
+	color: var(--link-hover);
 }
 
 .app-sidebar-header {
