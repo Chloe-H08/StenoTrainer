@@ -245,18 +245,28 @@ function loadSettings() {
 
 const APP_NAV_ITEMS = [
 	{ page: 'index.html', label: 'Home', description: 'Start here' },
-	{ page: 'form.html', label: 'Drill Setups', description: 'Custom text, reading, quotes, and more' },
 	{ page: 'intro.html', label: 'Intro Lessons', description: 'Foundations and first drills' },
 	{ page: 'learn-keyboard.html', label: 'Keyboard Practice', description: 'Map keys and chords' },
 	{ page: 'learn-plover.html', label: 'Learn Plover', description: 'Theory-focused lessons' },
 	{ page: 'finger-drills.html', label: 'Finger Drills', description: 'Rhythm and repetition work' },
-	{ page: 'raw-steno-instructions.html', label: 'Raw Input Guide', description: 'Plover setup notes' },
+	{ page: 'form.html?mode=custom-text', label: 'Custom Text', description: 'Paste your own text and launch a drill' },
+	{ page: 'form.html?mode=most-used', label: 'Most Used Words', description: 'Practice from the high-frequency word list' },
+	{ page: 'form.html?mode=gutenberg', label: 'Gutenberg Sentences', description: 'Reading practice from book excerpts' },
+	{ page: 'form.html?mode=markov', label: 'Generated Sentences', description: 'Random sentence drills from fiction-frequency words' },
+	{ page: 'form.html?mode=emily', label: 'Emily Symbols', description: 'Dedicated setup for symbol drills' },
+	{ page: 'form.html?mode=quotes', label: 'Monkeytype Quotes', description: 'Practice quotes with configurable lengths' },
+	{ page: 'form.html?mode=phonetic', label: 'Single-Stroke CVC', description: 'Simple phonetic consonant-vowel-consonant drills' },
+	{ page: 'form.html?mode=numbers', label: 'Number Sentences', description: 'Time-based 1-99 sentence practice' },
+	{ page: 'two-key.html', label: 'Two-Key Sentences', description: 'Focused practice for two-key sentence drills' },
+	{ page: 'form.html', label: 'Full Drill Library', description: 'Browse every available setup in one place' },
+	{ page: 'raw-steno-instructions.html', label: 'Raw Steno Instructions', description: 'Use raw steno output for keyboard and drill practice' },
 ]
 
 function appRoute(page) {
+	const [pathname, query = ''] = page.split('?')
 	const inPagesDir = /\/pages\/[^/]+$/.test(window.location.pathname)
-	if(page === 'index.html') return inPagesDir ? '../index.html' : 'index.html'
-	return inPagesDir ? page : 'pages/' + page
+	if(pathname === 'index.html') return (inPagesDir ? '../index.html' : 'index.html') + (query ? '?' + query : '')
+	return (inPagesDir ? pathname : 'pages/' + pathname) + (query ? '?' + query : '')
 }
 
 function currentPageName() {
@@ -294,7 +304,8 @@ function initAppChrome() {
 
 	const current = currentPageName()
 	const navLinks = APP_NAV_ITEMS.map(item => {
-		const active = current === item.page
+		const itemPath = item.page.split('?')[0]
+		const active = current === itemPath
 		return N('a', {
 			href: appRoute(item.page),
 			class: 'app-nav-link' + (active ? ' active' : ''),
