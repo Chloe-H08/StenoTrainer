@@ -579,7 +579,8 @@ TypeJig.prototype.answerChanged = function() {
 
 	const next = (expected.tokens[a] || {text:''}).text
 	if(this.hint && this.hint.update) {
-		this.hint.update(match ? next : ex, r.left, r.top)
+		const hintWord = (actual.tokens.length === 0 || match) ? next : ex
+		this.hint.update(hintWord, r.left, r.top)
 		const ok = (match || partial) && a-1 !== this.lastMismatch
 		if(this.hint_on_fail && ok) this.hint.hide()
 		else this.hint.show()
