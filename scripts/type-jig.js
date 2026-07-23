@@ -147,9 +147,26 @@ TypeJig.prototype.expectedStenoFor = function(word) {
 	const candidates = []
 	TypeJig.addExpectedStenoCandidates(candidates, this.translations[word])
 	TypeJig.addExpectedStenoCandidates(candidates, this.translations[word.toLowerCase()])
+	const trimmed = TypeJig.trimWordChars(word)
+	if(trimmed && trimmed !== word) {
+		TypeJig.addExpectedStenoCandidates(candidates, this.translations[trimmed])
+		TypeJig.addExpectedStenoCandidates(candidates, this.translations[trimmed.toLowerCase()])
+	}
 	TypeJig.addExpectedStenoCandidates(candidates, TypeJig.pseudoStenoFor(word))
+	if(trimmed && trimmed !== word) {
+		TypeJig.addExpectedStenoCandidates(candidates, TypeJig.pseudoStenoFor(trimmed))
+	}
 	if(candidates.length === 0) return word
 	return TypeJig.uniqueStrings(candidates)
+}
+
+TypeJig.trimWordChars = function(word) {
+	if(typeof preOrPostChars !== 'undefined') {
+		const match = preOrPostChars.exec(word)
+		if(match) return match[2]
+	}
+	const fallback = /^[^A-Za-z0-9']*([A-Za-z0-9']+)[^A-Za-z0-9']*$/.exec(word)
+	return fallback ? fallback[1] : word
 }
 
 TypeJig.wordsAndSpaces = function(string) {
